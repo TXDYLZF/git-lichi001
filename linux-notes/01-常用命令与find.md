@@ -161,3 +161,31 @@ find /lib/modules -name "*.ko"          # 找内核模块
 - `find -name"cal"` 报 `unknown predicate`：**选项和值之间必须有空格**，且第一个参数是路径，省略要写 `.`。
 - 文件名**区分大小写**，`s02single` 和 `S02single` 是两个文件。
 - 输出末尾的 `Permission denied` 不是错误，只是没权限进某些目录，用 `2>/dev/null` 屏蔽。
+
+## 十、关机与重启：shutdown 家族
+
+```bash
+shutdown -h now          # 立即关机（halt）
+shutdown -h 10:30        # 定时：10:30 关机
+shutdown -r +30          # 30 分钟后重启（reboot）
+shutdown -c              # 反悔：取消已计划的关机
+```
+
+| 命令 | 等价写法 | 说明 |
+|------|---------|------|
+| `shutdown -h` | `halt` / `poweroff` | 停机（poweroff 顺带断电） |
+| `shutdown -r` | `reboot` | 重启 |
+
+**为什么教学首选 shutdown**：它走 systemd/init 的正常流程，**先通知所有在线用户、按序停服务再断电**；halt/poweroff/reboot 是直接动作。多用户系统里突然 poweroff 会砍掉别人的会话。
+
+**timedatectl 补充**（有 systemd 的系统）：
+
+```bash
+timedatectl status                      # 看时间/时区/NTP 状态
+timedatectl set-timezone Asia/Shanghai  # 改时区（注意拼写，不是 ShangHai）
+```
+
+本实验虚机（Ubuntu 16.04 精简版）**没有 systemd**，timedatectl 不存在——改时区用老办法：
+`sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime`（详见第一节的 date 部分）。
+
+**嵌入式视角**：嵌入式板子上往往连 shutdown 都没有，断电就是断电——所以重要数据要落盘（fsync）、文件系统选掉电安全的（或加只读保护），这正是 XFS/ext4 日志和 ubifs 存在的理由。
