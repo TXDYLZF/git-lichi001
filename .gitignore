@@ -1,0 +1,7 @@
+# 编译产物（Windows 可执行文件）
+*.exe
+*.out
+*.o
+
+# 编译输出目录
+output/
